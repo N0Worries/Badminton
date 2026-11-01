@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Shuttle Planner</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg:#0E2B2E;
+  --bg-alt:#123539;
+  --surface:#F4F7F5;
+  --surface-soft:#E4EDE9;
+  --ink:#0E2A2E;
+  --ink-soft:#5C7772;
+  --on-dark:#EAF2EF;
+  --on-dark-soft:#9DBAB4;
+  --accent:#E8B23D;
+  --accent-ink:#2A1D02;
+  --lvl1:#4FB286;
+  --lvl2:#9CBF4E;
+  --lvl3:#E8B23D;
+  --lvl4:#E2823D;
+  --lvl5:#E1573F;
+  --line:rgba(234,242,239,0.14);
+  --shadow:0 10px 28px rgba(0,0,0,0.28);
+  --radius:14px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--on-dark);
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  font-size:16px;
+  min-height:100vh;
+  -webkit-tap-highlight-color:transparent;
+}
+button{font-family:inherit;cursor:pointer;}
+.loading{padding:40px;text-align:center;color:var(--on-dark-soft);font-size:18px;}
+
+.topbar{
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;
+  padding:18px 24px;background:var(--bg-alt);border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:10;
+}
+@media (max-width:700px){
+  .topbar{grid-template-columns:1fr;justify-items:center;text-align:center;}
+}
+.brand{
+  font-family:'Oswald',sans-serif;font-weight:700;font-size:22px;letter-spacing:0.06em;
+  color:var(--on-dark);justify-self:start;
+}
+@media (max-width:700px){.brand{justify-self:center;}}
+.brand small{display:block;font-family:'Inter',sans-serif;font-weight:400;letter-spacing:0;font-size:12.5px;color:var(--on-dark-soft);margin-top:2px;}
+.date-badge{
+  justify-self:center;font-family:'Oswald',sans-serif;font-weight:500;font-size:15px;
+  letter-spacing:0.03em;color:var(--on-dark-soft);text-transform:capitalize;white-space:nowrap;
+}
+@media (max-width:700px){.date-badge{justify-self:center;}}
+.tabs{display:flex;gap:8px;background:rgba(0,0,0,0.2);padding:5px;border-radius:999px;justify-self:end;}
+@media (max-width:700px){.tabs{justify-self:center;}}
+.topright{justify-self:end;display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;}
+@media (max-width:700px){.topright{justify-self:center;justify-content:center;}}
+.lang-select{
+  background:rgba(0,0,0,0.25);color:var(--on-dark);border:1px solid var(--line);border-radius:999px;
+  padding:12px 16px;font:inherit;font-size:15px;font-weight:600;cursor:pointer;
+}
+.lang-select option{color:#0E2A2E;background:#F4F7F5;}
+.tabbtn{
+  border:none;background:transparent;color:var(--on-dark-soft);
+  padding:11px 20px;border-radius:999px;font-size:15px;font-weight:600;
+  transition:background 0.15s,color 0.15s;
+}
+.tabbtn.active{background:var(--accent);color:var(--accent-ink);}
+
+main{padding:20px;max-width:1300px;margin:0 auto;}
+
+.grid-avond{display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start;}
+@media (max-width:880px){.grid-avond{grid-template-columns:1fr;}}
+
+.panel{
+  background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px;
+}
+.panel h2{
+  font-family:'Oswald',sans-serif;font-size:16px;font-weight:600;letter-spacing:0.03em;
+  margin:0 0 14px;color:var(--on-dark);
+}
+.panel-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px;}
+
+.member-row{
+  display:flex;align-items:center;gap:12px;padding:12px 10px;border-radius:10px;
+  cursor:pointer;transition:background 0.12s;user-select:none;
+}
+.member-row:hover{background:rgba(255,255,255,0.04);}
+.member-row.present{background:rgba(232,178,61,0.1);}
+.checkbox{
+  width:26px;height:26px;border-radius:7px;border:2px solid var(--on-dark-soft);
+  flex:none;display:flex;align-items:center;justify-content:center;transition:all 0.12s;
+}
+.member-row.present .checkbox{background:var(--accent);border-color:var(--accent);}
+.checkbox svg{width:15px;height:15px;opacity:0;transition:opacity 0.12s;}
+.member-row.present .checkbox svg{opacity:1;}
+.member-name{flex:1;font-size:15.5px;font-weight:500;}
+.lvl-pill{
+  font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px;color:var(--ink);
+  flex:none;
+}
+.lvl1{background:var(--lvl1);} .lvl2{background:var(--lvl2);} .lvl3{background:var(--lvl3);} .lvl4{background:var(--lvl4);} .lvl5{background:var(--lvl5);}
+
+.btn{
+  border:none;border-radius:10px;padding:13px 18px;font-size:15px;font-weight:600;
+  transition:transform 0.08s,opacity 0.12s;
+}
+.btn:active{transform:scale(0.97);}
+.btn-primary{background:var(--accent);color:var(--accent-ink);}
+.btn-ghost{background:rgba(255,255,255,0.07);color:var(--on-dark);}
+.btn-danger{background:rgba(225,87,63,0.15);color:#F3A292;}
+.btn:disabled{opacity:0.4;cursor:not-allowed;}
+.btn-sm{padding:9px 14px;font-size:13.5px;border-radius:8px;}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;}
+
+.stepper{display:flex;align-items:center;gap:12px;background:rgba(0,0,0,0.2);border-radius:10px;padding:6px 10px;}
+.stepper button{width:36px;height:36px;border-radius:8px;border:none;background:rgba(255,255,255,0.08);color:var(--on-dark);font-size:18px;font-weight:700;}
+.stepper .num{min-width:26px;text-align:center;font-family:'Oswald',sans-serif;font-size:18px;font-weight:600;}
+
+.count-note{color:var(--on-dark-soft);font-size:13.5px;margin-bottom:14px;}
+.warn{color:#F3A292;font-size:13.5px;margin-top:8px;}
+
+.results-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;}
+.round-badge{
+  font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;color:var(--on-dark-soft);
+  background:rgba(255,255,255,0.06);padding:6px 14px;border-radius:999px;
+}
+.empty-state{
+  text-align:center;padding:50px 20px;color:var(--on-dark-soft);
+}
+.empty-state svg{width:46px;height:46px;opacity:0.4;margin-bottom:14px;}
+
+.velden-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+.veld-card{
+  background:var(--surface);color:var(--ink);border-radius:var(--radius);
+  padding:16px 18px 18px;box-shadow:var(--shadow);
+}
+.veld-head{
+  display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;
+}
+.veld-head .veld-num{font-family:'Oswald',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.04em;}
+.veld-head .veld-sum{font-size:12.5px;color:var(--ink-soft);font-weight:600;}
+.team{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 0;font-size:15px;font-weight:600;}
+.team .amp{color:var(--ink-soft);font-weight:400;font-size:13px;}
+.team .pill{font-size:11px;padding:3px 7px;color:var(--ink);}
+.net{
+  height:1px;margin:8px 0;position:relative;
+  background:repeating-linear-gradient(90deg,var(--ink-soft) 0 3px,transparent 3px 9px);
+  opacity:0.5;
+}
+.net .vs{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  background:var(--surface);padding:0 8px;font-family:'Oswald',sans-serif;
+  font-size:10.5px;font-weight:700;color:var(--ink-soft);letter-spacing:0.05em;
+}
+
+.rest-box{margin-top:18px;padding:14px 16px;background:rgba(255,255,255,0.04);border-radius:12px;}
+.rest-box h3{margin:0 0 8px;font-size:13.5px;font-weight:600;color:var(--on-dark-soft);}
+.rest-names{display:flex;flex-wrap:wrap;gap:6px;}
+
+.swap-hint{
+  font-size:13px;color:var(--accent);background:rgba(232,178,61,0.12);
+  border-radius:9px;padding:9px 12px;margin-bottom:14px;
+}
+.player-tap{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 9px 5px 6px;margin:2px 0;border-radius:9px;
+  border:2px solid transparent;cursor:pointer;transition:all 0.12s;font:inherit;
+}
+.veld-card .player-tap{color:var(--ink);}
+.player-tap:hover{background:rgba(0,0,0,0.06);}
+.rest-box .player-tap{color:var(--on-dark);}
+.rest-box .player-tap:hover{background:rgba(255,255,255,0.08);}
+.player-tap.selected{border-color:var(--accent);background:rgba(232,178,61,0.22);}
+
+details.overview{margin-top:16px;}
+details.overview summary{cursor:pointer;font-size:13.5px;font-weight:600;color:var(--on-dark-soft);padding:6px 0;}
+.log-list{max-height:420px;overflow-y:auto;margin-top:6px;}
+.log-round{padding:10px 0;border-bottom:1px solid var(--line);}
+.log-round:last-child{border-bottom:none;}
+.log-round-head{font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;margin-bottom:6px;}
+.log-game{display:flex;gap:10px;font-size:14px;padding:3px 0;}
+.log-court{flex:none;width:58px;color:var(--on-dark-soft);font-weight:600;font-size:12.5px;padding-top:1px;}
+.log-game em{font-style:normal;color:var(--on-dark-soft);margin:0 2px;}
+.log-rest{font-size:13px;color:var(--on-dark-soft);margin-top:4px;}
+.ov-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px;}
+.ov-table th{text-align:left;font-weight:600;color:var(--on-dark-soft);font-size:12px;padding:6px 8px;border-bottom:1px solid var(--line);}
+.ov-table td{padding:7px 8px;border-bottom:1px solid var(--line);}
+
+/* Leden tab */
+.leden-top{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+@media (max-width:800px){.leden-top{grid-template-columns:1fr;}}
+.field-label{display:block;font-size:12.5px;font-weight:600;color:var(--on-dark-soft);margin-bottom:6px;}
+input[type=text],textarea{
+  width:100%;background:rgba(0,0,0,0.22);border:1px solid var(--line);border-radius:9px;
+  padding:11px 12px;color:var(--on-dark);font-size:15px;font-family:inherit;
+}
+textarea{resize:vertical;min-height:78px;}
+.level-picker{display:flex;gap:6px;margin-top:8px;}
+.lvl-choice{
+  flex:1;padding:10px 0;border-radius:8px;border:2px solid transparent;background:rgba(255,255,255,0.06);
+  color:var(--on-dark-soft);font-weight:700;font-size:15px;text-align:center;
+}
+.lvl-choice.sel1{border-color:var(--lvl1);color:var(--lvl1);background:rgba(79,178,134,0.12);}
+.lvl-choice.sel2{border-color:var(--lvl2);color:var(--lvl2);background:rgba(156,191,78,0.12);}
+.lvl-choice.sel3{border-color:var(--lvl3);color:var(--lvl3);background:rgba(232,178,61,0.12);}
+.lvl-choice.sel4{border-color:var(--lvl4);color:var(--lvl4);background:rgba(226,130,61,0.12);}
+.lvl-choice.sel5{border-color:var(--lvl5);color:var(--lvl5);background:rgba(225,87,63,0.12);}
+
+.leden-list-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.leden-list-head h2{margin:0;}
+.leden-row{
+  display:flex;align-items:center;gap:12px;padding:11px 6px;border-bottom:1px solid var(--line);
+}
+.leden-row:last-child{border-bottom:none;}
+.leden-row .nm{flex:1;font-size:15px;font-weight:500;}
+.mini-level{display:flex;gap:6px;}
+.mini-lvl-btn{
+  width:32px;height:32px;border-radius:8px;border:2px solid transparent;background:rgba(255,255,255,0.06);
+  color:var(--on-dark-soft);font-weight:700;font-size:13px;
+}
+.mini-lvl-btn.on1{border-color:var(--lvl1);color:var(--lvl1);background:rgba(79,178,134,0.15);}
+.mini-lvl-btn.on2{border-color:var(--lvl2);color:var(--lvl2);background:rgba(156,191,78,0.15);}
+.mini-lvl-btn.on3{border-color:var(--lvl3);color:var(--lvl3);background:rgba(232,178,61,0.15);}
+.mini-lvl-btn.on4{border-color:var(--lvl4);color:var(--lvl4);background:rgba(226,130,61,0.15);}
+.mini-lvl-btn.on5{border-color:var(--lvl5);color:var(--lvl5);background:rgba(225,87,63,0.15);}
+.del-btn{
+  width:34px;height:34px;border-radius:8px;border:none;background:rgba(225,87,63,0.12);color:#F3A292;
+  font-size:16px;flex:none;
+}
+.empty-hint{color:var(--on-dark-soft);font-size:14px;padding:10px 4px 4px;}
+</style>
+</head>
+<body>
+<div id="app"><div class="loading">Loading…</div></div>
+
+<script>
+function uid(){
+  try{ return crypto.randomUUID(); }catch(e){ return 'id-'+Date.now()+'-'+Math.random().toString(36).slice(2); }
+}
+function pairKey(a,b){ return [a,b].sort().join('|'); }
+function clamp(n,min,max){ return Math.max(min,Math.min(max,n)); }
+function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function escAttr(s){ return esc(s).replace(/"/g,'&quot;'); }
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function defaultEvening(){
+  return { presentIds:[], numCourts:4, round:0, restCount:{}, playCount:{},
+           partnerHistory:{}, opponentHistory:{}, lastMatches:[], lastSittingOut:[], gameLog:[] };
+}
+
+const LANGS = [
+  {code:'en', name:'English',    locale:'en-GB'},
+  {code:'nl', name:'Nederlands', locale:'nl-NL'},
+  {code:'fr', name:'Français',   locale:'fr-FR'},
+  {code:'de', name:'Deutsch',    locale:'de-DE'},
+  {code:'es', name:'Español',    locale:'es-ES'},
+  {code:'pt', name:'Português',  locale:'pt-PT'},
+  {code:'da', name:'Dansk',      locale:'da-DK'}
+];
+const DEFAULT_LANG = 'en';
+
+const I18N = {
+  en: {
+    tagline: "Automatic scheduling for doubles matches",
+    tabEvening: "Match night", tabMembers: "Members", language: "Language", loading: "Loading…",
+    present: "Present ({n}/{total})", allOn: "Select all", allOff: "Clear all",
+    noMembersHint: "No members yet. Go to the Members tab to get started.",
+    noScheduleTitle: "No schedule yet.", noScheduleHint: "Select the present members and press “{btn}”.",
+    generate: "Generate schedule",
+    swapHint: "Tap two players (including those resting) to swap them.",
+    restThisRound: "Resting this round",
+    court: "Court", levelSum: "level {n}", levelShort: "L", level: "Level",
+    numCourts: "Number of courts", roundN: "Round {n}",
+    confirmNewEvening: "Confirm: new evening", cancel: "Cancel", newEvening: "Start new evening",
+    minPlayers: "At least 4 players present are required.", genFailed: "Could not create a schedule.",
+    scheduleTitle: "Schedule", overviewTitle: "Overview this evening",
+    name: "Name", colPlayed: "Played", colRested: "Rested",
+    playedGamesTitle: "Games played this evening ({n})",
+    against: "vs", restLabel: "Resting:", removedMember: "(removed)",
+    addMemberTitle: "Add new member", namePlaceholder: "First name Last name", add: "Add",
+    bulkTitle: "Add several at once",
+    bulkHelp: "One name per line, optionally followed by a comma and level (1-5). Without a level, 3 is used.",
+    bulkPlaceholder: "John Smith, 4\nMary Jones, 3\nPeter Brown",
+    processList: "Process list",
+    backup: "Backup",
+    backupHelp: "Save the member list as a file, or load a previously saved list — handy as a backup or to transfer to another tablet.",
+    exportBtn: "Export member list (JSON)", importBtn: "Import member list (JSON)",
+    importError: "Could not read the file. Check that it is a JSON file created with “Export member list”.",
+    importFound: "{n} members found in the file. What would you like to do?",
+    importReplace: "Replace current list ({n} members)", importMerge: "Add to current list",
+    membersTitle: "Members ({n})", noMembersAdded: "No members added yet.",
+    exportFile: "members-"
+  },
+  nl: {
+    tagline: "Automatische indeling voor dubbelwedstrijden",
+    tabEvening: "Wedstrijdavond", tabMembers: "Leden", language: "Taal", loading: "Laden…",
+    present: "Aanwezig ({n}/{total})", allOn: "Alles aan", allOff: "Alles uit",
+    noMembersHint: "Nog geen leden. Ga naar het tabblad Leden om te beginnen.",
+    noScheduleTitle: "Nog geen indeling gemaakt.", noScheduleHint: "Selecteer aanwezige leden en druk op “{btn}”.",
+    generate: "Genereer indeling",
+    swapHint: "Tik op twee spelers (ook in de rustlijst) om ze te wisselen.",
+    restThisRound: "Rust deze ronde",
+    court: "Veld", levelSum: "niveau {n}", levelShort: "N", level: "Niveau",
+    numCourts: "Aantal velden", roundN: "Ronde {n}",
+    confirmNewEvening: "Bevestig: nieuwe avond", cancel: "Annuleer", newEvening: "Nieuwe avond starten",
+    minPlayers: "Minimaal 4 aanwezige spelers nodig.", genFailed: "Kon geen indeling maken.",
+    scheduleTitle: "Indeling", overviewTitle: "Overzicht deze avond",
+    name: "Naam", colPlayed: "Gespeeld", colRested: "Gerust",
+    playedGamesTitle: "Gespeelde spellen deze avond ({n})",
+    against: "tegen", restLabel: "Rust:", removedMember: "(verwijderd)",
+    addMemberTitle: "Nieuw lid toevoegen", namePlaceholder: "Voornaam Achternaam", add: "Toevoegen",
+    bulkTitle: "Meerdere tegelijk toevoegen",
+    bulkHelp: "Eén naam per regel, optioneel gevolgd door een komma en niveau (1-5). Zonder niveau wordt 3 gebruikt.",
+    bulkPlaceholder: "Jan Jansen, 4\nMarie de Vries, 3\nPiet Peters",
+    processList: "Lijst verwerken",
+    backup: "Back-up",
+    backupHelp: "Bewaar de ledenlijst als bestand, of laad een eerder opgeslagen lijst terug in — handig als reservekopie of om naar een andere tablet over te zetten.",
+    exportBtn: "Exporteer ledenlijst (JSON)", importBtn: "Importeer ledenlijst (JSON)",
+    importError: "Kon het bestand niet lezen. Controleer of dit een JSON-bestand is dat via “Exporteer ledenlijst” is gemaakt.",
+    importFound: "{n} leden gevonden in het bestand. Wat wil je doen?",
+    importReplace: "Vervang huidige lijst ({n} leden)", importMerge: "Voeg toe aan huidige lijst",
+    membersTitle: "Leden ({n})", noMembersAdded: "Nog geen leden toegevoegd.",
+    exportFile: "ledenlijst-"
+  },
+  fr: {
+    tagline: "Répartition automatique pour les matchs en double",
+    tabEvening: "Soirée de jeu", tabMembers: "Membres", language: "Langue", loading: "Chargement…",
+    present: "Présents ({n}/{total})", allOn: "Tout sélectionner", allOff: "Tout désélectionner",
+    noMembersHint: "Aucun membre pour l'instant. Allez dans l'onglet Membres pour commencer.",
+    noScheduleTitle: "Aucune répartition pour l'instant.", noScheduleHint: "Sélectionnez les membres présents et appuyez sur « {btn} ».",
+    generate: "Générer la répartition",
+    swapHint: "Touchez deux joueurs (y compris ceux au repos) pour les échanger.",
+    restThisRound: "Au repos ce tour",
+    court: "Terrain", levelSum: "niveau {n}", levelShort: "N", level: "Niveau",
+    numCourts: "Nombre de terrains", roundN: "Tour {n}",
+    confirmNewEvening: "Confirmer : nouvelle soirée", cancel: "Annuler", newEvening: "Démarrer une nouvelle soirée",
+    minPlayers: "Au moins 4 joueurs présents sont nécessaires.", genFailed: "Impossible de créer une répartition.",
+    scheduleTitle: "Répartition", overviewTitle: "Aperçu de la soirée",
+    name: "Nom", colPlayed: "Joués", colRested: "Repos",
+    playedGamesTitle: "Matchs joués ce soir ({n})",
+    against: "contre", restLabel: "Repos :", removedMember: "(supprimé)",
+    addMemberTitle: "Ajouter un membre", namePlaceholder: "Prénom Nom", add: "Ajouter",
+    bulkTitle: "Ajouter plusieurs membres à la fois",
+    bulkHelp: "Un nom par ligne, éventuellement suivi d'une virgule et du niveau (1-5). Sans niveau, 3 est utilisé.",
+    bulkPlaceholder: "Jean Dupont, 4\nMarie Martin, 3\nPierre Durand",
+    processList: "Traiter la liste",
+    backup: "Sauvegarde",
+    backupHelp: "Enregistrez la liste des membres dans un fichier, ou rechargez une liste enregistrée précédemment — pratique comme sauvegarde ou pour la transférer vers une autre tablette.",
+    exportBtn: "Exporter la liste des membres (JSON)", importBtn: "Importer la liste des membres (JSON)",
+    importError: "Impossible de lire le fichier. Vérifiez qu'il s'agit d'un fichier JSON créé avec « Exporter la liste des membres ».",
+    importFound: "{n} membres trouvés dans le fichier. Que souhaitez-vous faire ?",
+    importReplace: "Remplacer la liste actuelle ({n} membres)", importMerge: "Ajouter à la liste actuelle",
+    membersTitle: "Membres ({n})", noMembersAdded: "Aucun membre ajouté pour l'instant.",
+    exportFile: "membres-"
+  },
+  de: {
+    tagline: "Automatische Einteilung für Doppelspiele",
+    tabEvening: "Spielabend", tabMembers: "Mitglieder", language: "Sprache", loading: "Laden…",
+    present: "Anwesend ({n}/{total})", allOn: "Alle auswählen", allOff: "Alle abwählen",
+    noMembersHint: "Noch keine Mitglieder. Wechsle zum Reiter „Mitglieder“, um zu beginnen.",
+    noScheduleTitle: "Noch keine Einteilung erstellt.", noScheduleHint: "Wähle die anwesenden Mitglieder aus und tippe auf „{btn}“.",
+    generate: "Einteilung erstellen",
+    swapHint: "Tippe auf zwei Spieler (auch in der Pausenliste), um sie zu tauschen.",
+    restThisRound: "Pause in dieser Runde",
+    court: "Feld", levelSum: "Niveau {n}", levelShort: "N", level: "Niveau",
+    numCourts: "Anzahl Felder", roundN: "Runde {n}",
+    confirmNewEvening: "Bestätigen: neuer Abend", cancel: "Abbrechen", newEvening: "Neuen Abend starten",
+    minPlayers: "Mindestens 4 anwesende Spieler erforderlich.", genFailed: "Die Einteilung konnte nicht erstellt werden.",
+    scheduleTitle: "Einteilung", overviewTitle: "Übersicht dieses Abends",
+    name: "Name", colPlayed: "Gespielt", colRested: "Pausiert",
+    playedGamesTitle: "Heute gespielte Spiele ({n})",
+    against: "gegen", restLabel: "Pause:", removedMember: "(entfernt)",
+    addMemberTitle: "Neues Mitglied hinzufügen", namePlaceholder: "Vorname Nachname", add: "Hinzufügen",
+    bulkTitle: "Mehrere auf einmal hinzufügen",
+    bulkHelp: "Ein Name pro Zeile, optional gefolgt von einem Komma und dem Niveau (1-5). Ohne Niveau wird 3 verwendet.",
+    bulkPlaceholder: "Hans Müller, 4\nMaria Schmidt, 3\nPeter Weber",
+    processList: "Liste verarbeiten",
+    backup: "Backup",
+    backupHelp: "Speichere die Mitgliederliste als Datei oder lade eine zuvor gespeicherte Liste wieder ein – praktisch als Sicherung oder zum Übertragen auf ein anderes Tablet.",
+    exportBtn: "Mitgliederliste exportieren (JSON)", importBtn: "Mitgliederliste importieren (JSON)",
+    importError: "Die Datei konnte nicht gelesen werden. Prüfe, ob es eine JSON-Datei ist, die mit „Mitgliederliste exportieren“ erstellt wurde.",
+    importFound: "{n} Mitglieder in der Datei gefunden. Was möchtest du tun?",
+    importReplace: "Aktuelle Liste ersetzen ({n} Mitglieder)", importMerge: "Zur aktuellen Liste hinzufügen",
+    membersTitle: "Mitglieder ({n})", noMembersAdded: "Noch keine Mitglieder hinzugefügt.",
+    exportFile: "mitglieder-"
+  },
+  es: {
+    tagline: "Reparto automático para partidos de dobles",
+    tabEvening: "Noche de juego", tabMembers: "Miembros", language: "Idioma", loading: "Cargando…",
+    present: "Presentes ({n}/{total})", allOn: "Seleccionar todos", allOff: "Deseleccionar todos",
+    noMembersHint: "Aún no hay miembros. Ve a la pestaña Miembros para empezar.",
+    noScheduleTitle: "Todavía no se ha creado ningún reparto.", noScheduleHint: "Selecciona los miembros presentes y pulsa «{btn}».",
+    generate: "Generar reparto",
+    swapHint: "Toca a dos jugadores (también en la lista de descanso) para intercambiarlos.",
+    restThisRound: "Descansan esta ronda",
+    court: "Pista", levelSum: "nivel {n}", levelShort: "N", level: "Nivel",
+    numCourts: "Número de pistas", roundN: "Ronda {n}",
+    confirmNewEvening: "Confirmar: nueva noche", cancel: "Cancelar", newEvening: "Empezar una nueva noche",
+    minPlayers: "Se necesitan al menos 4 jugadores presentes.", genFailed: "No se pudo crear el reparto.",
+    scheduleTitle: "Reparto", overviewTitle: "Resumen de esta noche",
+    name: "Nombre", colPlayed: "Jugados", colRested: "Descansos",
+    playedGamesTitle: "Partidos jugados esta noche ({n})",
+    against: "contra", restLabel: "Descanso:", removedMember: "(eliminado)",
+    addMemberTitle: "Añadir nuevo miembro", namePlaceholder: "Nombre Apellido", add: "Añadir",
+    bulkTitle: "Añadir varios a la vez",
+    bulkHelp: "Un nombre por línea, opcionalmente seguido de una coma y el nivel (1-5). Sin nivel se usa 3.",
+    bulkPlaceholder: "Juan García, 4\nMaría López, 3\nPedro Ruiz",
+    processList: "Procesar lista",
+    backup: "Copia de seguridad",
+    backupHelp: "Guarda la lista de miembros como archivo, o carga una lista guardada anteriormente: útil como copia de seguridad o para pasarla a otra tableta.",
+    exportBtn: "Exportar lista de miembros (JSON)", importBtn: "Importar lista de miembros (JSON)",
+    importError: "No se pudo leer el archivo. Comprueba que es un archivo JSON creado con «Exportar lista de miembros».",
+    importFound: "Se han encontrado {n} miembros en el archivo. ¿Qué quieres hacer?",
+    importReplace: "Reemplazar la lista actual ({n} miembros)", importMerge: "Añadir a la lista actual",
+    membersTitle: "Miembros ({n})", noMembersAdded: "Aún no se han añadido miembros.",
+    exportFile: "miembros-"
+  },
+  pt: {
+    tagline: "Distribuição automática para jogos de pares",
+    tabEvening: "Noite de jogos", tabMembers: "Membros", language: "Idioma", loading: "A carregar…",
+    present: "Presentes ({n}/{total})", allOn: "Selecionar todos", allOff: "Desmarcar todos",
+    noMembersHint: "Ainda não há membros. Vá ao separador Membros para começar.",
+    noScheduleTitle: "Ainda não foi criada nenhuma distribuição.", noScheduleHint: "Selecione os membros presentes e prima «{btn}».",
+    generate: "Gerar distribuição",
+    swapHint: "Toque em dois jogadores (também na lista de descanso) para os trocar.",
+    restThisRound: "Em descanso nesta ronda",
+    court: "Campo", levelSum: "nível {n}", levelShort: "N", level: "Nível",
+    numCourts: "Número de campos", roundN: "Ronda {n}",
+    confirmNewEvening: "Confirmar: nova noite", cancel: "Cancelar", newEvening: "Iniciar nova noite",
+    minPlayers: "São necessários pelo menos 4 jogadores presentes.", genFailed: "Não foi possível criar a distribuição.",
+    scheduleTitle: "Distribuição", overviewTitle: "Resumo desta noite",
+    name: "Nome", colPlayed: "Jogados", colRested: "Descansos",
+    playedGamesTitle: "Jogos disputados esta noite ({n})",
+    against: "contra", restLabel: "Descanso:", removedMember: "(removido)",
+    addMemberTitle: "Adicionar novo membro", namePlaceholder: "Nome Apelido", add: "Adicionar",
+    bulkTitle: "Adicionar vários de uma vez",
+    bulkHelp: "Um nome por linha, opcionalmente seguido de uma vírgula e do nível (1-5). Sem nível, é usado 3.",
+    bulkPlaceholder: "João Silva, 4\nMaria Santos, 3\nPedro Costa",
+    processList: "Processar lista",
+    backup: "Cópia de segurança",
+    backupHelp: "Guarde a lista de membros como ficheiro, ou carregue uma lista guardada anteriormente — útil como cópia de segurança ou para transferir para outro tablet.",
+    exportBtn: "Exportar lista de membros (JSON)", importBtn: "Importar lista de membros (JSON)",
+    importError: "Não foi possível ler o ficheiro. Verifique se é um ficheiro JSON criado com «Exportar lista de membros».",
+    importFound: "Foram encontrados {n} membros no ficheiro. O que pretende fazer?",
+    importReplace: "Substituir a lista atual ({n} membros)", importMerge: "Adicionar à lista atual",
+    membersTitle: "Membros ({n})", noMembersAdded: "Ainda não foram adicionados membros.",
+    exportFile: "membros-"
+  },
+  da: {
+    tagline: "Automatisk opdeling til doublekampe",
+    tabEvening: "Spilleaften", tabMembers: "Medlemmer", language: "Sprog", loading: "Indlæser…",
+    present: "Til stede ({n}/{total})", allOn: "Vælg alle", allOff: "Fravælg alle",
+    noMembersHint: "Ingen medlemmer endnu. Gå til fanen Medlemmer for at komme i gang.",
+    noScheduleTitle: "Der er endnu ikke lavet nogen opdeling.", noScheduleHint: "Vælg de tilstedeværende medlemmer og tryk på “{btn}”.",
+    generate: "Generér opdeling",
+    swapHint: "Tryk på to spillere (også på hvilelisten) for at bytte dem.",
+    restThisRound: "Hviler denne runde",
+    court: "Bane", levelSum: "niveau {n}", levelShort: "N", level: "Niveau",
+    numCourts: "Antal baner", roundN: "Runde {n}",
+    confirmNewEvening: "Bekræft: ny aften", cancel: "Annuller", newEvening: "Start ny aften",
+    minPlayers: "Der skal mindst være 4 spillere til stede.", genFailed: "Kunne ikke lave en opdeling.",
+    scheduleTitle: "Opdeling", overviewTitle: "Oversigt for denne aften",
+    name: "Navn", colPlayed: "Spillet", colRested: "Hvilet",
+    playedGamesTitle: "Spillede kampe i aften ({n})",
+    against: "mod", restLabel: "Hviler:", removedMember: "(fjernet)",
+    addMemberTitle: "Tilføj nyt medlem", namePlaceholder: "Fornavn Efternavn", add: "Tilføj",
+    bulkTitle: "Tilføj flere på én gang",
+    bulkHelp: "Ét navn pr. linje, evt. efterfulgt af et komma og niveau (1-5). Uden niveau bruges 3.",
+    bulkPlaceholder: "Jens Jensen, 4\nMette Hansen, 3\nPeter Nielsen",
+    processList: "Behandl liste",
+    backup: "Backup",
+    backupHelp: "Gem medlemslisten som en fil, eller indlæs en tidligere gemt liste – praktisk som sikkerhedskopi eller til at overføre til en anden tablet.",
+    exportBtn: "Eksportér medlemsliste (JSON)", importBtn: "Importér medlemsliste (JSON)",
+    importError: "Filen kunne ikke læses. Kontrollér, at det er en JSON-fil oprettet med „Eksportér medlemsliste“.",
+    importFound: "Der blev fundet {n} medlemmer i filen. Hvad vil du gøre?",
+    importReplace: "Erstat nuværende liste ({n} medlemmer)", importMerge: "Føj til nuværende liste",
+    membersTitle: "Medlemmer ({n})", noMembersAdded: "Der er endnu ikke tilføjet medlemmer.",
+    exportFile: "medlemmer-"
+  }
+};
+
+function langInfo(){ return LANGS.find(l=>l.code===state.lang) || LANGS[0]; }
+function loc(){ return langInfo().locale; }
+function t(key, params){
+  const dict = I18N[state.lang] || I18N[DEFAULT_LANG];
+  let s = dict[key];
+  if(s === undefined) s = I18N[DEFAULT_LANG][key];
+  if(s === undefined) return key;
+  if(params) for(const k in params) s = s.split('{'+k+'}').join(String(params[k]));
+  return s;
+}
+
+const state = {
+  lang:DEFAULT_LANG,
+  tab:'avond',
+  roster:[],
+  evening: defaultEvening(),
+  loading:true,
+  confirmingReset:false,
+  genMessage:'',
+  swapSelection:null,
+  pendingImport:null,
+  importError:'',
+  newName:'',
+  bulkText:''
+};
+
+function formattedToday(){
+  const d = new Date();
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  let day;
+  try{ day = new Intl.DateTimeFormat(loc(), {weekday:'long'}).format(d); }
+  catch(e){ day = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]; }
+  return `${day} ${dd}-${mm}-${d.getFullYear()}`;
+}
+
+function locateInRound(id){
+  const ev = state.evening;
+  for(let i=0;i<ev.lastMatches.length;i++){
+    const m = ev.lastMatches[i];
+    if(m.teamA[0]===id) return {type:'match', idx:i, team:'teamA', slot:0};
+    if(m.teamA[1]===id) return {type:'match', idx:i, team:'teamA', slot:1};
+    if(m.teamB[0]===id) return {type:'match', idx:i, team:'teamB', slot:0};
+    if(m.teamB[1]===id) return {type:'match', idx:i, team:'teamB', slot:1};
+  }
+  const ri = ev.lastSittingOut.indexOf(id);
+  if(ri>=0) return {type:'rest', idx:ri};
+  return null;
+}
+function bumpPair(map, x, y, sign){
+  const k = pairKey(x,y);
+  const v = (map[k]||0) + sign;
+  if(v<=0) delete map[k]; else map[k]=v;
+}
+function applyMatchHistory(match, sign){
+  const ev = state.evening;
+  const [a1,a2] = match.teamA, [b1,b2] = match.teamB;
+  bumpPair(ev.partnerHistory, a1, a2, sign);
+  bumpPair(ev.partnerHistory, b1, b2, sign);
+  bumpPair(ev.opponentHistory, a1, b1, sign);
+  bumpPair(ev.opponentHistory, a1, b2, sign);
+  bumpPair(ev.opponentHistory, a2, b1, sign);
+  bumpPair(ev.opponentHistory, a2, b2, sign);
+}
+
+const STORAGE_PREFIX = 'shuttle-planner:';
+
+async function storageGet(key){
+  let value = null;
+  try{
+    const raw = localStorage.getItem(STORAGE_PREFIX+key);
+    if(raw) value = JSON.parse(raw);
+  }catch(e){}
+  if(value===null){
+    try{
+      if(window.storage){
+        const r = await window.storage.get(key, false);
+        if(r) value = JSON.parse(r.value);
+      }
+    }catch(e){}
+  }
+  return value;
+}
+async function storageSet(key, value){
+  try{ localStorage.setItem(STORAGE_PREFIX+key, JSON.stringify(value)); }catch(e){}
+  try{ if(window.storage) await window.storage.set(key, JSON.stringify(value), false); }catch(e){}
+}
+
+async function init(){
+  const roster = await storageGet('roster');
+  const evening = await storageGet('evening');
+  const savedLang = await storageGet('lang');
+  state.lang = LANGS.some(l=>l.code===savedLang) ? savedLang : DEFAULT_LANG;
+  state.roster = roster || [];
+  state.evening = evening || defaultEvening();
+  if(!Array.isArray(state.evening.gameLog)){
+    const ev0 = state.evening;
+    ev0.gameLog = (ev0.lastMatches && ev0.lastMatches.length)
+      ? [{round:ev0.round, matches:JSON.parse(JSON.stringify(ev0.lastMatches)), rest:[...(ev0.lastSittingOut||[])]}]
+      : [];
+  }
+  state.loading = false;
+  render();
+}
+
+function syncLog(){
+  const ev = state.evening;
+  if(!Array.isArray(ev.gameLog)) ev.gameLog = [];
+  const entry = { round:ev.round, matches:JSON.parse(JSON.stringify(ev.lastMatches)), rest:[...ev.lastSittingOut] };
+  const last = ev.gameLog[ev.gameLog.length-1];
+  if(last && last.round===ev.round) ev.gameLog[ev.gameLog.length-1] = entry;
+  else ev.gameLog.push(entry);
+}
+
+function persistRoster(){ storageSet('roster', state.roster); }
+function persistEvening(){ storageSet('evening', state.evening); }
+
+const App = {
+  setTab(tab){ state.tab=tab; state.confirmingReset=false; state.swapSelection=null; render(); },
+  setLang(code){
+    if(!LANGS.some(l=>l.code===code)) return;
+    state.lang = code;
+    storageSet('lang', code);
+    render();
+  },
+
+  addMember(){
+    const input = document.getElementById('newName');
+    const name = input.value.trim();
+    if(!name) return;
+    const levelBtn = document.querySelector('#newLevelPicker .lvl-choice.active');
+    const level = levelBtn ? Number(levelBtn.dataset.lvl) : 3;
+    state.roster.push({id:uid(), name, level});
+    state.newName='';
+    persistRoster();
+    render();
+  },
+  pickNewLevel(lvl){
+    const nameInput = document.getElementById('newName');
+    if(nameInput) state.newName = nameInput.value;
+    const bulkInput = document.getElementById('bulkText');
+    if(bulkInput) state.bulkText = bulkInput.value;
+    App._newLevel = lvl;
+    render();
+  },
+  bulkAdd(){
+    const ta = document.getElementById('bulkText');
+    const lines = ta.value.split('\n').map(l=>l.trim()).filter(Boolean);
+    let added = 0;
+    for(const line of lines){
+      const parts = line.split(/[,;\t]/).map(p=>p.trim());
+      const name = parts[0];
+      if(!name) continue;
+      let level = parseInt(parts[1]);
+      if(isNaN(level)) level = 3;
+      level = clamp(level,1,5);
+      state.roster.push({id:uid(), name, level});
+      added++;
+    }
+    ta.value='';
+    state.bulkText='';
+    if(added>0){ persistRoster(); render(); }
+  },
+  setLevel(id, level){
+    const m = state.roster.find(x=>x.id===id);
+    if(m){ m.level=level; persistRoster(); render(); }
+  },
+  removeMember(id){
+    state.roster = state.roster.filter(x=>x.id!==id);
+    state.evening.presentIds = state.evening.presentIds.filter(x=>x!==id);
+    persistRoster(); persistEvening(); render();
+  },
+
+  exportRoster(){
+    const data = state.roster.map(m=>({name:m.name, level:m.level}));
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const dd = new Date();
+    const stamp = dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0')+'-'+String(dd.getDate()).padStart(2,'0');
+    a.href = url;
+    a.download = t('exportFile')+stamp+'.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  },
+  triggerImport(){
+    const input = document.getElementById('importFileInput');
+    if(input) input.click();
+  },
+  handleImportFile(input){
+    const file = input.files && input.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (e)=>{
+      state.importError='';
+      state.pendingImport=null;
+      try{
+        const parsed = JSON.parse(e.target.result);
+        if(!Array.isArray(parsed)) throw new Error('geen lijst');
+        const cleaned = parsed
+          .filter(x=>x && typeof x.name==='string' && x.name.trim())
+          .map(x=>({name:x.name.trim(), level:clamp(parseInt(x.level)||3,1,5)}));
+        if(cleaned.length===0) throw new Error('leeg');
+        state.pendingImport = cleaned;
+      }catch(err){
+        state.importError = 'importError';
+      }
+      render();
+    };
+    reader.readAsText(file);
+    input.value='';
+  },
+  cancelImport(){ state.pendingImport=null; render(); },
+  applyImportReplace(){
+    if(!state.pendingImport) return;
+    state.roster = state.pendingImport.map(m=>({id:uid(), name:m.name, level:m.level}));
+    state.evening.presentIds = state.evening.presentIds.filter(id=>state.roster.some(m=>m.id===id));
+    state.pendingImport=null;
+    persistRoster(); persistEvening(); render();
+  },
+  applyImportMerge(){
+    if(!state.pendingImport) return;
+    const existingNames = new Set(state.roster.map(m=>m.name.trim().toLowerCase()));
+    for(const m of state.pendingImport){
+      if(existingNames.has(m.name.toLowerCase())) continue;
+      state.roster.push({id:uid(), name:m.name, level:m.level});
+      existingNames.add(m.name.toLowerCase());
+    }
+    state.pendingImport=null;
+    persistRoster(); render();
+  },
+
+  togglePresent(id){
+    const p = state.evening.presentIds;
+    const i = p.indexOf(id);
+    if(i>=0) p.splice(i,1); else p.push(id);
+    persistEvening(); render();
+  },
+  setAllPresent(val){
+    state.evening.presentIds = val ? state.roster.map(m=>m.id) : [];
+    persistEvening(); render();
+  },
+  changeCourts(delta){
+    state.evening.numCourts = clamp(state.evening.numCourts+delta,1,8);
+    persistEvening(); render();
+  },
+
+  generate(){
+    state.swapSelection=null;
+    const ev = state.evening;
+    const present = state.roster.filter(m=>ev.presentIds.includes(m.id));
+    const n = present.length;
+    if(n<4){ state.genMessage='minPlayers'; render(); return; }
+
+    const courtsUsed = Math.min(ev.numCourts, Math.floor(n/4));
+    const playCount = courtsUsed*4;
+    const numSitOut = n-playCount;
+
+    const sorted = shuffle(present).sort((a,b)=>
+      (ev.restCount[a.id]||0)-(ev.restCount[b.id]||0)
+    );
+    const sittingOut = sorted.slice(0,numSitOut);
+    const sitIds = new Set(sittingOut.map(m=>m.id));
+    const playing = present.filter(m=>!sitIds.has(m.id));
+
+    let best=null, bestScore=Infinity;
+    for(let iter=0; iter<400; iter++){
+      const shuffled = shuffle(playing);
+      const groups=[];
+      for(let i=0;i<shuffled.length;i+=4) groups.push(shuffled.slice(i,i+4));
+      let total=0;
+      const matches=[];
+      for(const g of groups){
+        const pairOptions=[[[0,1],[2,3]],[[0,2],[1,3]],[[0,3],[1,2]]];
+        let bp=null, bs=Infinity;
+        for(const po of pairOptions){
+          const teamA=[g[po[0][0]], g[po[0][1]]];
+          const teamB=[g[po[1][0]], g[po[1][1]]];
+          const levelDiff=Math.abs((teamA[0].level+teamA[1].level)-(teamB[0].level+teamB[1].level));
+          const partnerPenalty=(ev.partnerHistory[pairKey(teamA[0].id,teamA[1].id)]||0)+
+                                (ev.partnerHistory[pairKey(teamB[0].id,teamB[1].id)]||0);
+          let opponentPenalty=0;
+          for(const x of teamA) for(const y of teamB) opponentPenalty += ev.opponentHistory[pairKey(x.id,y.id)]||0;
+          const score = levelDiff*1.5 + partnerPenalty*8 + opponentPenalty*3;
+          if(score<bs){ bs=score; bp={teamA,teamB}; }
+        }
+        total+=bs;
+        matches.push(bp);
+      }
+      if(total<bestScore){ bestScore=total; best=matches; }
+    }
+
+    if(!best){ state.genMessage='genFailed'; render(); return; }
+
+    function sumLvl(m){ return m.teamA[0].level+m.teamA[1].level+m.teamB[0].level+m.teamB[1].level; }
+    best.sort((a,b)=>sumLvl(b)-sumLvl(a));
+
+    for(const m of best){
+      const kA=pairKey(m.teamA[0].id,m.teamA[1].id);
+      const kB=pairKey(m.teamB[0].id,m.teamB[1].id);
+      ev.partnerHistory[kA]=(ev.partnerHistory[kA]||0)+1;
+      ev.partnerHistory[kB]=(ev.partnerHistory[kB]||0)+1;
+      for(const x of m.teamA) for(const y of m.teamB){
+        const k=pairKey(x.id,y.id);
+        ev.opponentHistory[k]=(ev.opponentHistory[k]||0)+1;
+      }
+      for(const p of [...m.teamA,...m.teamB]) ev.playCount[p.id]=(ev.playCount[p.id]||0)+1;
+    }
+    for(const p of sittingOut) ev.restCount[p.id]=(ev.restCount[p.id]||0)+1;
+
+    ev.lastMatches = best.map((m,idx)=>({ court:idx+1, teamA:[m.teamA[0].id,m.teamA[1].id], teamB:[m.teamB[0].id,m.teamB[1].id] }));
+    ev.lastSittingOut = sittingOut.map(p=>p.id);
+    ev.round += 1;
+    syncLog();
+    state.genMessage='';
+    persistEvening();
+    render();
+  },
+
+  selectSwap(id){
+    if(state.swapSelection===id){ state.swapSelection=null; render(); return; }
+    if(state.swapSelection){
+      App.swapPlayers(state.swapSelection, id);
+      state.swapSelection=null;
+    } else {
+      state.swapSelection=id;
+      render();
+    }
+  },
+  swapPlayers(idA, idB){
+    if(idA===idB) return;
+    const ev = state.evening;
+    const locA = locateInRound(idA);
+    const locB = locateInRound(idB);
+    if(!locA || !locB) return;
+
+    if(locA.type==='match' && locB.type==='match'){
+      const touched = [...new Set([locA.idx, locB.idx])];
+      touched.forEach(i=>applyMatchHistory(ev.lastMatches[i], -1));
+      ev.lastMatches[locA.idx][locA.team][locA.slot] = idB;
+      ev.lastMatches[locB.idx][locB.team][locB.slot] = idA;
+      touched.forEach(i=>applyMatchHistory(ev.lastMatches[i], 1));
+    } else if(locA.type==='rest' && locB.type==='rest'){
+      ev.lastSittingOut[locA.idx] = idB;
+      ev.lastSittingOut[locB.idx] = idA;
+    } else {
+      const playLoc = locA.type==='match' ? locA : locB;
+      const restLoc = locA.type==='rest' ? locA : locB;
+      const playerPlaying = locA.type==='match' ? idA : idB;
+      const playerResting = locA.type==='rest' ? idA : idB;
+
+      applyMatchHistory(ev.lastMatches[playLoc.idx], -1);
+      ev.lastMatches[playLoc.idx][playLoc.team][playLoc.slot] = playerResting;
+      applyMatchHistory(ev.lastMatches[playLoc.idx], 1);
+      ev.lastSittingOut[restLoc.idx] = playerPlaying;
+
+      ev.playCount[playerPlaying] = Math.max(0,(ev.playCount[playerPlaying]||0)-1);
+      ev.restCount[playerPlaying] = (ev.restCount[playerPlaying]||0)+1;
+      ev.playCount[playerResting] = (ev.playCount[playerResting]||0)+1;
+      ev.restCount[playerResting] = Math.max(0,(ev.restCount[playerResting]||0)-1);
+    }
+    syncLog();
+    persistEvening();
+    render();
+  },
+
+  askReset(){ state.confirmingReset=true; render(); },
+  cancelReset(){ state.confirmingReset=false; render(); },
+  confirmReset(){
+    state.evening = { ...defaultEvening(), presentIds: state.evening.presentIds, numCourts: state.evening.numCourts };
+    state.confirmingReset=false;
+    persistEvening(); render();
+  }
+};
+
+function memberById(id){ return state.roster.find(m=>m.id===id); }
+
+function renderAvond(){
+  const ev = state.evening;
+  const present = state.roster.filter(m=>ev.presentIds.includes(m.id));
+  const sortedRoster = [...state.roster].sort((a,b)=>a.name.localeCompare(b.name,loc()));
+
+  const attendanceRows = sortedRoster.length ? sortedRoster.map(m=>{
+    const isPresent = ev.presentIds.includes(m.id);
+    return `<div class="member-row ${isPresent?'present':''}" onclick="App.togglePresent('${m.id}')">
+      <div class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="${'#2A1D02'}" stroke-width="3"><path d="M4 12l5 5L20 6"/></svg></div>
+      <div class="member-name">${esc(m.name)}</div>
+      <div class="lvl-pill lvl${m.level}">${t('levelShort')}${m.level}</div>
+    </div>`;
+  }).join('') : `<div class="empty-hint">${t('noMembersHint')}</div>`;
+
+  let resultsHtml;
+  if(ev.lastMatches.length===0){
+    resultsHtml = `<div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg>
+      <div>${t('noScheduleTitle')}<br>${t('noScheduleHint',{btn:t('generate')})}</div>
+    </div>`;
+  }else{
+    const chip = (m)=>{
+      const sel = state.swapSelection===m.id ? 'selected' : '';
+      return `<span class="player-tap ${sel}" onclick="App.selectSwap('${m.id}')">
+        <span class="lvl-pill pill lvl${m.level}">${t('levelShort')}${m.level}</span> ${esc(m.name)}
+      </span>`;
+    };
+    const cards = ev.lastMatches.map(m=>{
+      const a1=memberById(m.teamA[0]), a2=memberById(m.teamA[1]);
+      const b1=memberById(m.teamB[0]), b2=memberById(m.teamB[1]);
+      if(!a1||!a2||!b1||!b2) return '';
+      const sum = a1.level+a2.level+b1.level+b2.level;
+      return `<div class="veld-card">
+        <div class="veld-head"><span class="veld-num">${t('court').toUpperCase()} ${m.court}</span><span class="veld-sum">${t('levelSum',{n:sum})}</span></div>
+        <div class="team teamA">${chip(a1)}<span class="amp">&amp;</span>${chip(a2)}</div>
+        <div class="net"><span class="vs">VS</span></div>
+        <div class="team teamB">${chip(b1)}<span class="amp">&amp;</span>${chip(b2)}</div>
+      </div>`;
+    }).join('');
+    const restChips = ev.lastSittingOut.map(id=>memberById(id)).filter(Boolean).map(chip).join('');
+    resultsHtml = `<div class="swap-hint">${t('swapHint')}</div>
+      <div class="velden-grid">${cards}</div>
+      ${ev.lastSittingOut.length ? `<div class="rest-box"><h3>${t('restThisRound')}</h3><div class="rest-names">${restChips}</div></div>` : ''}`;
+  }
+
+  const nm = id => { const m = memberById(id); return m ? esc(m.name) : t('removedMember'); };
+  const gameLog = Array.isArray(ev.gameLog) ? ev.gameLog : [];
+  const totalGames = gameLog.reduce((sum,r)=>sum+r.matches.length,0);
+  const logRows = gameLog.slice().reverse().map(r=>`
+    <div class="log-round">
+      <div class="log-round-head">${t('roundN',{n:r.round})}</div>
+      ${r.matches.map(m=>`<div class="log-game"><span class="log-court">${t('court')} ${m.court}</span><span>${nm(m.teamA[0])} &amp; ${nm(m.teamA[1])} <em>${t('against')}</em> ${nm(m.teamB[0])} &amp; ${nm(m.teamB[1])}</span></div>`).join('')}
+      ${r.rest.length ? `<div class="log-rest">${t('restLabel')} ${r.rest.map(nm).join(', ')}</div>` : ''}
+    </div>`).join('');
+
+  const overviewRows = present.slice().sort((a,b)=>a.name.localeCompare(b.name,loc())).map(m=>
+    `<tr><td>${esc(m.name)}</td><td>${ev.playCount[m.id]||0}</td><td>${ev.restCount[m.id]||0}</td></tr>`
+  ).join('');
+
+  return `<div class="grid-avond">
+    <div class="panel">
+      <div class="panel-row"><h2>${t('present',{n:present.length,total:state.roster.length})}</h2></div>
+      <div class="btn-row" style="margin-bottom:14px;">
+        <button class="btn btn-ghost btn-sm" onclick="App.setAllPresent(true)">${t('allOn')}</button>
+        <button class="btn btn-ghost btn-sm" onclick="App.setAllPresent(false)">${t('allOff')}</button>
+      </div>
+      <div>${attendanceRows}</div>
+    </div>
+    <div>
+      <div class="panel" style="margin-bottom:18px;">
+        <div class="panel-row" style="flex-wrap:wrap;">
+          <div>
+            <span class="field-label" style="margin-bottom:4px;">${t('numCourts')}</span>
+            <div class="stepper">
+              <button onclick="App.changeCourts(-1)">−</button>
+              <span class="num">${ev.numCourts}</span>
+              <button onclick="App.changeCourts(1)">+</button>
+            </div>
+          </div>
+          <div class="round-badge">${t('roundN',{n:ev.round})}</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" ${present.length<4?'disabled':''} onclick="App.generate()">${t('generate')}</button>
+          ${state.confirmingReset
+            ? `<button class="btn btn-danger" onclick="App.confirmReset()">${t('confirmNewEvening')}</button><button class="btn btn-ghost" onclick="App.cancelReset()">${t('cancel')}</button>`
+            : `<button class="btn btn-ghost" onclick="App.askReset()">${t('newEvening')}</button>`}
+        </div>
+        ${present.length<4 ? `<div class="warn">${t('minPlayers')}</div>` : ''}
+        ${state.genMessage ? `<div class="warn">${esc(t(state.genMessage))}</div>` : ''}
+      </div>
+      <div class="panel">
+        <div class="results-head"><h2 style="margin:0;">${t('scheduleTitle')}</h2></div>
+        ${resultsHtml}
+        ${present.length ? `<details class="overview">
+          <summary>${t('overviewTitle')}</summary>
+          <table class="ov-table">
+            <thead><tr><th>${t('name')}</th><th>${t('colPlayed')}</th><th>${t('colRested')}</th></tr></thead>
+            <tbody>${overviewRows}</tbody>
+          </table>
+        </details>` : ''}
+        ${gameLog.length ? `<details class="overview">
+          <summary>${t('playedGamesTitle',{n:totalGames})}</summary>
+          <div class="log-list">${logRows}</div>
+        </details>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderLeden(){
+  const newLevel = App._newLevel || 3;
+  const sortedRoster = [...state.roster].sort((a,b)=>a.name.localeCompare(b.name,loc()));
+
+  const levelPicker = [1,2,3,4,5].map(l=>
+    `<div class="lvl-choice ${l===newLevel?'sel'+l+' active':''}" data-lvl="${l}" onclick="App.pickNewLevel(${l})">${l}</div>`
+  ).join('');
+
+  const rows = sortedRoster.length ? sortedRoster.map(m=>`
+    <div class="leden-row">
+      <div class="nm">${esc(m.name)}</div>
+      <div class="mini-level">
+        ${[1,2,3,4,5].map(l=>`<button class="mini-lvl-btn ${m.level===l?'on'+l:''}" onclick="App.setLevel('${m.id}',${l})">${l}</button>`).join('')}
+      </div>
+      <button class="del-btn" onclick="App.removeMember('${m.id}')">✕</button>
+    </div>
+  `).join('') : `<div class="empty-hint">${t('noMembersAdded')}</div>`;
+
+  return `
+    <div class="leden-top">
+      <div class="panel">
+        <h2>${t('addMemberTitle')}</h2>
+        <span class="field-label">${t('name')}</span>
+        <input type="text" id="newName" placeholder="${escAttr(t('namePlaceholder'))}" value="${escAttr(state.newName)}" oninput="state.newName=this.value" onkeydown="if(event.key==='Enter')App.addMember()">
+        <span class="field-label" style="margin-top:12px;">${t('level')}</span>
+        <div class="level-picker" id="newLevelPicker">${levelPicker}</div>
+        <button class="btn btn-primary" style="margin-top:14px;width:100%;" onclick="App.addMember()">${t('add')}</button>
+      </div>
+      <div class="panel">
+        <h2>${t('bulkTitle')}</h2>
+        <span class="field-label">${t('bulkHelp')}</span>
+        <textarea id="bulkText" placeholder="${escAttr(t('bulkPlaceholder')).replace(/\n/g,'&#10;')}" oninput="state.bulkText=this.value">${esc(state.bulkText)}</textarea>
+        <button class="btn btn-primary" style="margin-top:10px;width:100%;" onclick="App.bulkAdd()">${t('processList')}</button>
+      </div>
+    </div>
+    <div class="panel" style="margin-bottom:20px;">
+      <h2>${t('backup')}</h2>
+      <p class="field-label" style="margin-bottom:12px;">${t('backupHelp')}</p>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="App.exportRoster()" ${state.roster.length===0?'disabled':''}>${t('exportBtn')}</button>
+        <button class="btn btn-ghost" onclick="App.triggerImport()">${t('importBtn')}</button>
+      </div>
+      <input type="file" id="importFileInput" accept="application/json,.json" style="display:none" onchange="App.handleImportFile(this)">
+      ${state.importError ? `<div class="warn">${esc(t(state.importError))}</div>` : ''}
+      ${state.pendingImport ? `
+        <div class="swap-hint" style="margin-top:14px;">${t('importFound',{n:state.pendingImport.length})}</div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="App.applyImportReplace()">${t('importReplace',{n:state.roster.length})}</button>
+          <button class="btn btn-ghost" onclick="App.applyImportMerge()">${t('importMerge')}</button>
+          <button class="btn btn-ghost" onclick="App.cancelImport()">${t('cancel')}</button>
+        </div>
+      ` : ''}
+    </div>
+    <div class="panel">
+      <div class="leden-list-head"><h2>${t('membersTitle',{n:state.roster.length})}</h2></div>
+      ${rows}
+    </div>
+  `;
+}
+
+function render(){
+  const root = document.getElementById('app');
+  document.documentElement.lang = state.lang;
+  if(state.loading){ root.innerHTML='<div class="loading">'+t('loading')+'</div>'; return; }
+  root.innerHTML = `
+    <div class="topbar">
+      <div class="brand">SHUTTLE PLANNER<small>${t('tagline')}</small></div>
+      <div class="date-badge">${formattedToday()}</div>
+      <div class="topright">
+        <select class="lang-select" aria-label="${escAttr(t('language'))}" title="${escAttr(t('language'))}" onchange="App.setLang(this.value)">
+          ${LANGS.map(l=>`<option value="${l.code}" ${l.code===state.lang?'selected':''}>${l.name}</option>`).join('')}
+        </select>
+        <div class="tabs">
+          <button class="tabbtn ${state.tab==='avond'?'active':''}" onclick="App.setTab('avond')">${t('tabEvening')}</button>
+          <button class="tabbtn ${state.tab==='leden'?'active':''}" onclick="App.setTab('leden')">${t('tabMembers')}</button>
+        </div>
+      </div>
+    </div>
+    <main>${state.tab==='leden' ? renderLeden() : renderAvond()}</main>
+  `;
+}
+
+init();
+</script>
+</body>
+</html>
