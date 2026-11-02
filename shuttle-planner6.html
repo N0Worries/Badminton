@@ -68,6 +68,32 @@ button{font-family:inherit;cursor:pointer;}
   padding:12px 16px;font:inherit;font-size:15px;font-weight:600;cursor:pointer;
 }
 .lang-select option{color:#0E2A2E;background:#F4F7F5;}
+.help-btn{
+  width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:rgba(0,0,0,0.25);
+  color:var(--on-dark);font-family:'Oswald',sans-serif;font-size:20px;font-weight:600;flex:none;
+}
+.help-btn:active{transform:scale(0.95);}
+.modal-overlay{
+  position:fixed;inset:0;z-index:50;background:rgba(4,16,18,0.7);
+  display:flex;align-items:center;justify-content:center;padding:16px;
+}
+.modal{
+  background:var(--bg-alt);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);width:100%;max-width:580px;max-height:calc(100vh - 32px);overflow-y:auto;
+  padding:22px 24px;
+}
+.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;}
+.modal h2{font-family:'Oswald',sans-serif;font-size:22px;font-weight:600;letter-spacing:0.02em;margin:0;}
+.modal h3{font-family:'Oswald',sans-serif;font-size:16px;font-weight:600;margin:18px 0 8px;}
+.modal p{line-height:1.5;margin:0 0 10px;}
+.modal-close{
+  width:40px;height:40px;border-radius:10px;border:none;background:rgba(255,255,255,0.08);
+  color:var(--on-dark);font-size:16px;flex:none;
+}
+.help-steps{margin:0 0 14px;padding-left:22px;line-height:1.5;}
+.help-steps li{margin-bottom:7px;}
+.help-note{color:var(--on-dark-soft);font-size:14px;}
+.modal-foot{margin-top:16px;padding-top:16px;border-top:1px solid var(--line);}
 .tabbtn{
   border:none;background:transparent;color:var(--on-dark-soft);
   padding:11px 20px;border-radius:999px;font-size:15px;font-weight:600;
@@ -302,7 +328,19 @@ const I18N = {
     importFound: "{n} members found in the file. What would you like to do?",
     importReplace: "Replace current list ({n} members)", importMerge: "Add to current list",
     membersTitle: "Members ({n})", noMembersAdded: "No members added yet.",
-    exportFile: "members-"
+    exportFile: "members-",
+    helpButton: "Help",
+    close: "Close",
+    downloadApp: "Download app (HTML)",
+    helpDownloadHint: "Download the app as a single HTML file to use offline or to host yourself.",
+    helpTitle: "About Shuttle Planner",
+    helpIntro: "Shuttle Planner divides your club members over the courts for badminton doubles. It creates balanced 2-vs-2 matches, avoids repeating partners and opponents, and shares resting turns fairly.",
+    helpHowTitle: "How it works",
+    helpStep1: "On the “{tab}” tab, add your members and give each one a skill level from 1 to 5.",
+    helpStep2: "On the “{tab}” tab, tick who is present and set the number of courts.",
+    helpStep3: "Press “{btn}” for every new round. Tap two players to swap them by hand.",
+    helpStep4: "Press “{btn}” at the start of a new club night to reset the history.",
+    helpData: "Everything is stored on this device only. Use the backup options on the “{tab}” tab to export or import your member list."
   },
   nl: {
     tagline: "Automatische indeling voor dubbelwedstrijden",
@@ -333,7 +371,19 @@ const I18N = {
     importFound: "{n} leden gevonden in het bestand. Wat wil je doen?",
     importReplace: "Vervang huidige lijst ({n} leden)", importMerge: "Voeg toe aan huidige lijst",
     membersTitle: "Leden ({n})", noMembersAdded: "Nog geen leden toegevoegd.",
-    exportFile: "ledenlijst-"
+    exportFile: "ledenlijst-",
+    helpButton: "Help",
+    close: "Sluiten",
+    downloadApp: "Download app (HTML)",
+    helpDownloadHint: "Download de app als één HTML-bestand om offline te gebruiken of zelf te hosten.",
+    helpTitle: "Over Shuttle Planner",
+    helpIntro: "Shuttle Planner verdeelt de leden van je club over de velden voor badminton-dubbelspel. De app maakt evenwichtige 2-tegen-2-wedstrijden, voorkomt herhaling van partners en tegenstanders en verdeelt de rustbeurten eerlijk.",
+    helpHowTitle: "Zo werkt het",
+    helpStep1: "Voeg op het tabblad “{tab}” je leden toe en geef ieder een niveau van 1 tot 5.",
+    helpStep2: "Vink op het tabblad “{tab}” aan wie er is en stel het aantal velden in.",
+    helpStep3: "Druk voor elke nieuwe ronde op “{btn}”. Tik op twee spelers om ze met de hand te wisselen.",
+    helpStep4: "Druk aan het begin van een nieuwe clubavond op “{btn}” om de geschiedenis te wissen.",
+    helpData: "Alles wordt alleen op dit apparaat bewaard. Gebruik de back-upopties op het tabblad “{tab}” om je ledenlijst te exporteren of te importeren."
   },
   fr: {
     tagline: "Répartition automatique pour les matchs en double",
@@ -364,7 +414,19 @@ const I18N = {
     importFound: "{n} membres trouvés dans le fichier. Que souhaitez-vous faire ?",
     importReplace: "Remplacer la liste actuelle ({n} membres)", importMerge: "Ajouter à la liste actuelle",
     membersTitle: "Membres ({n})", noMembersAdded: "Aucun membre ajouté pour l'instant.",
-    exportFile: "membres-"
+    exportFile: "membres-",
+    helpButton: "Aide",
+    close: "Fermer",
+    downloadApp: "Télécharger l'application (HTML)",
+    helpDownloadHint: "Téléchargez l'application sous forme d'un seul fichier HTML pour l'utiliser hors ligne ou l'héberger vous-même.",
+    helpTitle: "À propos de Shuttle Planner",
+    helpIntro: "Shuttle Planner répartit les membres de votre club sur les terrains pour des matchs de badminton en double. L'application crée des matchs 2 contre 2 équilibrés, évite de répéter les partenaires et les adversaires, et répartit équitablement les tours de repos.",
+    helpHowTitle: "Comment ça marche",
+    helpStep1: "Dans l'onglet « {tab} », ajoutez vos membres et donnez à chacun un niveau de 1 à 5.",
+    helpStep2: "Dans l'onglet « {tab} », cochez les personnes présentes et réglez le nombre de terrains.",
+    helpStep3: "Appuyez sur « {btn} » à chaque nouveau tour. Touchez deux joueurs pour les échanger à la main.",
+    helpStep4: "Appuyez sur « {btn} » au début d'une nouvelle soirée pour effacer l'historique.",
+    helpData: "Tout est enregistré uniquement sur cet appareil. Utilisez les options de sauvegarde de l'onglet « {tab} » pour exporter ou importer votre liste de membres."
   },
   de: {
     tagline: "Automatische Einteilung für Doppelspiele",
@@ -395,7 +457,19 @@ const I18N = {
     importFound: "{n} Mitglieder in der Datei gefunden. Was möchtest du tun?",
     importReplace: "Aktuelle Liste ersetzen ({n} Mitglieder)", importMerge: "Zur aktuellen Liste hinzufügen",
     membersTitle: "Mitglieder ({n})", noMembersAdded: "Noch keine Mitglieder hinzugefügt.",
-    exportFile: "mitglieder-"
+    exportFile: "mitglieder-",
+    helpButton: "Hilfe",
+    close: "Schließen",
+    downloadApp: "App herunterladen (HTML)",
+    helpDownloadHint: "Lade die App als einzelne HTML-Datei herunter, um sie offline zu nutzen oder selbst zu hosten.",
+    helpTitle: "Über Shuttle Planner",
+    helpIntro: "Shuttle Planner verteilt die Mitglieder deines Vereins auf die Felder für Badminton-Doppel. Die App erstellt ausgewogene 2-gegen-2-Spiele, vermeidet Wiederholungen bei Partnern und Gegnern und verteilt die Pausen fair.",
+    helpHowTitle: "So funktioniert es",
+    helpStep1: "Füge im Reiter „{tab}“ deine Mitglieder hinzu und gib jedem ein Niveau von 1 bis 5.",
+    helpStep2: "Hake im Reiter „{tab}“ an, wer anwesend ist, und stelle die Anzahl der Felder ein.",
+    helpStep3: "Tippe in jeder neuen Runde auf „{btn}“. Tippe auf zwei Spieler, um sie von Hand zu tauschen.",
+    helpStep4: "Tippe zu Beginn eines neuen Spielabends auf „{btn}“, um den Verlauf zurückzusetzen.",
+    helpData: "Alles wird nur auf diesem Gerät gespeichert. Mit den Backup-Optionen im Reiter „{tab}“ kannst du deine Mitgliederliste exportieren oder importieren."
   },
   es: {
     tagline: "Reparto automático para partidos de dobles",
@@ -426,7 +500,19 @@ const I18N = {
     importFound: "Se han encontrado {n} miembros en el archivo. ¿Qué quieres hacer?",
     importReplace: "Reemplazar la lista actual ({n} miembros)", importMerge: "Añadir a la lista actual",
     membersTitle: "Miembros ({n})", noMembersAdded: "Aún no se han añadido miembros.",
-    exportFile: "miembros-"
+    exportFile: "miembros-",
+    helpButton: "Ayuda",
+    close: "Cerrar",
+    downloadApp: "Descargar la aplicación (HTML)",
+    helpDownloadHint: "Descarga la aplicación como un único archivo HTML para usarla sin conexión o alojarla tú mismo.",
+    helpTitle: "Acerca de Shuttle Planner",
+    helpIntro: "Shuttle Planner reparte a los miembros de tu club entre las pistas para partidos de dobles de bádminton. La aplicación crea partidos 2 contra 2 equilibrados, evita repetir compañeros y rivales y reparte los descansos de forma justa.",
+    helpHowTitle: "Cómo funciona",
+    helpStep1: "En la pestaña «{tab}», añade a tus miembros y asigna a cada uno un nivel del 1 al 5.",
+    helpStep2: "En la pestaña «{tab}», marca quién está presente y ajusta el número de pistas.",
+    helpStep3: "Pulsa «{btn}» en cada ronda nueva. Toca a dos jugadores para intercambiarlos a mano.",
+    helpStep4: "Pulsa «{btn}» al comenzar una nueva noche de club para borrar el historial.",
+    helpData: "Todo se guarda solo en este dispositivo. Usa las opciones de copia de seguridad de la pestaña «{tab}» para exportar o importar tu lista de miembros."
   },
   pt: {
     tagline: "Distribuição automática para jogos de pares",
@@ -457,7 +543,19 @@ const I18N = {
     importFound: "Foram encontrados {n} membros no ficheiro. O que pretende fazer?",
     importReplace: "Substituir a lista atual ({n} membros)", importMerge: "Adicionar à lista atual",
     membersTitle: "Membros ({n})", noMembersAdded: "Ainda não foram adicionados membros.",
-    exportFile: "membros-"
+    exportFile: "membros-",
+    helpButton: "Ajuda",
+    close: "Fechar",
+    downloadApp: "Transferir a aplicação (HTML)",
+    helpDownloadHint: "Transfira a aplicação como um único ficheiro HTML para a usar offline ou alojar por si.",
+    helpTitle: "Sobre o Shuttle Planner",
+    helpIntro: "O Shuttle Planner distribui os membros do seu clube pelos campos para jogos de pares de badmínton. A aplicação cria jogos 2 contra 2 equilibrados, evita repetir parceiros e adversários e reparte os descansos de forma justa.",
+    helpHowTitle: "Como funciona",
+    helpStep1: "No separador «{tab}», adicione os seus membros e atribua a cada um um nível de 1 a 5.",
+    helpStep2: "No separador «{tab}», marque quem está presente e defina o número de campos.",
+    helpStep3: "Prima «{btn}» em cada nova ronda. Toque em dois jogadores para os trocar manualmente.",
+    helpStep4: "Prima «{btn}» no início de uma nova noite do clube para apagar o histórico.",
+    helpData: "Tudo é guardado apenas neste dispositivo. Use as opções de cópia de segurança no separador «{tab}» para exportar ou importar a sua lista de membros."
   },
   da: {
     tagline: "Automatisk opdeling til doublekampe",
@@ -488,7 +586,19 @@ const I18N = {
     importFound: "Der blev fundet {n} medlemmer i filen. Hvad vil du gøre?",
     importReplace: "Erstat nuværende liste ({n} medlemmer)", importMerge: "Føj til nuværende liste",
     membersTitle: "Medlemmer ({n})", noMembersAdded: "Der er endnu ikke tilføjet medlemmer.",
-    exportFile: "medlemmer-"
+    exportFile: "medlemmer-",
+    helpButton: "Hjælp",
+    close: "Luk",
+    downloadApp: "Download appen (HTML)",
+    helpDownloadHint: "Download appen som én HTML-fil, så du kan bruge den offline eller selv hoste den.",
+    helpTitle: "Om Shuttle Planner",
+    helpIntro: "Shuttle Planner fordeler klubbens medlemmer på banerne til badminton-double. Appen laver afbalancerede 2-mod-2-kampe, undgår gentagelser af makkere og modstandere og fordeler hvilerunderne retfærdigt.",
+    helpHowTitle: "Sådan fungerer det",
+    helpStep1: "Tilføj dine medlemmer på fanen “{tab}”, og giv hver enkelt et niveau fra 1 til 5.",
+    helpStep2: "Sæt kryds ved dem, der er til stede, på fanen “{tab}”, og indstil antallet af baner.",
+    helpStep3: "Tryk på “{btn}” for hver ny runde. Tryk på to spillere for at bytte dem manuelt.",
+    helpStep4: "Tryk på “{btn}” i starten af en ny klubaften for at nulstille historikken.",
+    helpData: "Alt gemmes kun på denne enhed. Brug backup-indstillingerne på fanen “{tab}” til at eksportere eller importere din medlemsliste."
   }
 };
 
@@ -505,6 +615,7 @@ function t(key, params){
 
 const state = {
   lang:DEFAULT_LANG,
+  showHelp:false,
   tab:'avond',
   roster:[],
   evening: defaultEvening(),
@@ -609,6 +720,16 @@ function syncLog(){
 function persistRoster(){ storageSet('roster', state.roster); }
 function persistEvening(){ storageSet('evening', state.evening); }
 
+function buildAppHtml(){
+  const clone = document.documentElement.cloneNode(true);
+  const app = clone.querySelector('#app');
+  if(app) app.innerHTML = '<div class="loading">Loading…</div>';
+  clone.setAttribute('lang','en');
+  const body = clone.querySelector('body');
+  if(body) body.removeAttribute('style');
+  return '<!DOCTYPE html>\n' + clone.outerHTML;
+}
+
 const App = {
   setTab(tab){ state.tab=tab; state.confirmingReset=false; state.swapSelection=null; render(); },
   setLang(code){
@@ -616,6 +737,20 @@ const App = {
     state.lang = code;
     storageSet('lang', code);
     render();
+  },
+
+  openHelp(){ state.showHelp=true; render(); },
+  closeHelp(){ state.showHelp=false; render(); },
+  downloadApp(){
+    const blob = new Blob([buildAppHtml()], {type:'text/html'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'shuttle-planner.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
   },
 
   addMember(){
@@ -1021,6 +1156,7 @@ function renderLeden(){
       <div class="btn-row">
         <button class="btn btn-ghost" onclick="App.exportRoster()" ${state.roster.length===0?'disabled':''}>${t('exportBtn')}</button>
         <button class="btn btn-ghost" onclick="App.triggerImport()">${t('importBtn')}</button>
+        <button class="btn btn-ghost" onclick="App.downloadApp()">${t('downloadApp')}</button>
       </div>
       <input type="file" id="importFileInput" accept="application/json,.json" style="display:none" onchange="App.handleImportFile(this)">
       ${state.importError ? `<div class="warn">${esc(t(state.importError))}</div>` : ''}
@@ -1040,6 +1176,31 @@ function renderLeden(){
   `;
 }
 
+function renderHelp(){
+  const tabM = t('tabMembers'), tabE = t('tabEvening');
+  return `<div class="modal-overlay" onclick="if(event.target===this)App.closeHelp()">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+      <div class="modal-head">
+        <h2 id="helpTitle">${t('helpTitle')}</h2>
+        <button id="helpClose" class="modal-close" aria-label="${escAttr(t('close'))}" onclick="App.closeHelp()">✕</button>
+      </div>
+      <p class="help-intro">${t('helpIntro')}</p>
+      <h3>${t('helpHowTitle')}</h3>
+      <ol class="help-steps">
+        <li>${t('helpStep1',{tab:tabM})}</li>
+        <li>${t('helpStep2',{tab:tabE})}</li>
+        <li>${t('helpStep3',{btn:t('generate')})}</li>
+        <li>${t('helpStep4',{btn:t('newEvening')})}</li>
+      </ol>
+      <p class="help-note">${t('helpData',{tab:tabM})}</p>
+      <div class="modal-foot">
+        <p class="help-note">${t('helpDownloadHint')}</p>
+        <button class="btn btn-primary" onclick="App.downloadApp()">${t('downloadApp')}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
 function render(){
   const root = document.getElementById('app');
   document.documentElement.lang = state.lang;
@@ -1052,6 +1213,7 @@ function render(){
         <select class="lang-select" aria-label="${escAttr(t('language'))}" title="${escAttr(t('language'))}" onchange="App.setLang(this.value)">
           ${LANGS.map(l=>`<option value="${l.code}" ${l.code===state.lang?'selected':''}>${l.name}</option>`).join('')}
         </select>
+        <button class="help-btn" aria-label="${escAttr(t('helpButton'))}" title="${escAttr(t('helpButton'))}" onclick="App.openHelp()">?</button>
         <div class="tabs">
           <button class="tabbtn ${state.tab==='avond'?'active':''}" onclick="App.setTab('avond')">${t('tabEvening')}</button>
           <button class="tabbtn ${state.tab==='leden'?'active':''}" onclick="App.setTab('leden')">${t('tabMembers')}</button>
@@ -1059,8 +1221,13 @@ function render(){
       </div>
     </div>
     <main>${state.tab==='leden' ? renderLeden() : renderAvond()}</main>
+    ${state.showHelp ? renderHelp() : ''}
   `;
+  document.body.style.overflow = state.showHelp ? 'hidden' : '';
+  if(state.showHelp){ const c = document.getElementById('helpClose'); if(c) c.focus(); }
 }
+
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && state.showHelp) App.closeHelp(); });
 
 init();
 </script>
